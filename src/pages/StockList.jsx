@@ -119,7 +119,6 @@ const StockList = () => {
     return "good";
   };
 
-  // Filter & sort batches
   const filteredBatches = batches.filter((batch) =>
     batch.drugName?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     batch.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
@@ -149,92 +148,65 @@ const StockList = () => {
     }
   };
 
-  const toggleLowStock = () => setShowLowStock(!showLowStock);
-  const toggleExpiring = () => setShowExpiring(!showExpiring);
-
   return (
-    <div className="min-h-screen bg-gray-50 font-sans antialiased">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem 1rem" }}>
         {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div style={{ marginBottom: "2rem", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-              <Layers className="w-7 h-7 text-indigo-600" />
-              Stock Management
+            <h1 style={{ fontSize: "1.875rem", fontWeight: "bold", color: "#111827", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Layers size={28} color="#4f46e5" /> Stock Management
             </h1>
-            <p className="text-gray-500 mt-1">Monitor batches, adjust inventory, and update pricing</p>
+            <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>Monitor batches, adjust inventory, and update pricing</p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2 flex items-center gap-2">
-            <Package className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600">
-              Total batches: <strong className="text-gray-900 font-mono">{batches.length}</strong>
-            </span>
+          <div style={{ backgroundColor: "white", borderRadius: "0.75rem", border: "1px solid #e5e7eb", padding: "0.5rem 1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Package size={16} color="#9ca3af" />
+            <span style={{ fontSize: "0.875rem", color: "#4b5563" }}>Total batches: <strong style={{ color: "#111827" }}>{batches.length}</strong></span>
           </div>
         </div>
 
-        {/* Alerts Section */}
+        {/* Alerts - collapsible (same as before, but I'll keep it concise) */}
         {(lowStock.length > 0 || expiring.red?.length > 0) && (
-          <div className="space-y-4 mb-8">
+          <div style={{ marginBottom: "2rem" }}>
             {lowStock.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <button
-                  onClick={toggleLowStock}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-white hover:bg-rose-50/50 transition"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="w-5 h-5 text-rose-500" />
-                    <h3 className="font-semibold text-gray-800">Low Stock Alert</h3>
-                    <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                      {lowStock.length} item{lowStock.length !== 1 ? "s" : ""}
-                    </span>
+              <div style={{ backgroundColor: "white", borderRadius: "0.75rem", border: "1px solid #e5e7eb", marginBottom: "1rem" }}>
+                <button onClick={() => setShowLowStock(!showLowStock)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", background: "linear-gradient(to right, #fff1f2, white)", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <TrendingDown size={20} color="#f43f5e" />
+                    <span style={{ fontWeight: "600" }}>Low Stock Alert</span>
+                    <span style={{ backgroundColor: "#ffe4e6", color: "#be123c", fontSize: "0.75rem", fontWeight: "bold", padding: "0.125rem 0.5rem", borderRadius: "9999px" }}>{lowStock.length} items</span>
                   </div>
-                  {showLowStock ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                  {showLowStock ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {showLowStock && (
-                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                  <div style={{ borderTop: "1px solid #f3f4f6" }}>
                     {lowStock.map((item) => (
-                      <div key={item.drug} className="flex justify-between items-center p-4 hover:bg-gray-50">
-                        <div>
-                          <p className="font-medium text-gray-800">{item.drug}</p>
-                          <p className="text-xs text-gray-400">Minimum threshold: {item.minStock || 10}</p>
-                        </div>
-                        <div className="bg-rose-100 text-rose-700 font-bold font-mono px-3 py-1 rounded-full text-sm">
-                          {item.currentStock} left
-                        </div>
+                      <div key={item.drug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", borderBottom: "1px solid #f9fafb" }}>
+                        <div><p style={{ fontWeight: "500" }}>{item.drug}</p><p style={{ fontSize: "0.75rem", color: "#9ca3af" }}>Min: {item.minStock || 10}</p></div>
+                        <span style={{ backgroundColor: "#ffe4e6", color: "#be123c", fontWeight: "bold", padding: "0.25rem 0.75rem", borderRadius: "9999px" }}>{item.currentStock} left</span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             )}
-
             {expiring.red?.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <button
-                  onClick={toggleExpiring}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-white hover:bg-amber-50/50 transition"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-amber-600" />
-                    <h3 className="font-semibold text-gray-800">Expiring Soon (≤30 days)</h3>
-                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                      {expiring.red.length} batch{expiring.red.length !== 1 ? "es" : ""}
-                    </span>
+              <div style={{ backgroundColor: "white", borderRadius: "0.75rem", border: "1px solid #e5e7eb" }}>
+                <button onClick={() => setShowExpiring(!showExpiring)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", background: "linear-gradient(to right, #fffbeb, white)", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Clock size={20} color="#d97706" />
+                    <span style={{ fontWeight: "600" }}>Expiring Soon (≤30 days)</span>
+                    <span style={{ backgroundColor: "#fef3c7", color: "#b45309", fontSize: "0.75rem", fontWeight: "bold", padding: "0.125rem 0.5rem", borderRadius: "9999px" }}>{expiring.red.length} batches</span>
                   </div>
-                  {showExpiring ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                  {showExpiring ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {showExpiring && (
-                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                  <div style={{ borderTop: "1px solid #f3f4f6" }}>
                     {expiring.red.map((batch) => (
-                      <div key={batch._id} className="p-4 hover:bg-gray-50">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium text-gray-800">{batch.drugName?.name}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Batch: {batch.batchNumber}</p>
-                          </div>
-                          <span className="text-amber-700 font-mono text-sm bg-amber-50 px-2 py-1 rounded">
-                            {new Date(batch.expiryDate).toLocaleDateString()}
-                          </span>
+                      <div key={batch._id} style={{ padding: "1rem", borderBottom: "1px solid #f9fafb" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <div><p style={{ fontWeight: "500" }}>{batch.drugName?.name}</p><p style={{ fontSize: "0.75rem", color: "#9ca3af" }}>Batch: {batch.batchNumber}</p></div>
+                          <span style={{ color: "#b45309", fontSize: "0.875rem", backgroundColor: "#fffbeb", padding: "0.25rem 0.5rem", borderRadius: "0.375rem" }}>{new Date(batch.expiryDate).toLocaleDateString()}</span>
                         </div>
                       </div>
                     ))}
@@ -247,137 +219,65 @@ const StockList = () => {
 
         {/* Active Batches Section */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <Package className="w-5 h-5 text-indigo-500" />
-              Active Batches
-            </h2>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by drug or batch..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64"
-                />
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", gap: "1rem" }}>
+            <h2 style={{ fontSize: "1.125rem", fontWeight: "600", display: "flex", alignItems: "center", gap: "0.5rem" }}><Package size={20} color="#4f46e5" /> Active Batches</h2>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <div style={{ position: "relative" }}>
+                <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#9ca3af" }} />
+                <input type="text" placeholder="Search drug or batch..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: "0.5rem 0.75rem 0.5rem 2rem", border: "1px solid #d1d5db", borderRadius: "0.75rem", fontSize: "0.875rem", width: "100%", minWidth: "200px" }} />
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => toggleSort("name")}
-                  className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "name"
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
-                </button>
-                <button
-                  onClick={() => toggleSort("stock")}
-                  className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "stock"
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  Stock {sortBy === "stock" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
-                </button>
-                <button
-                  onClick={() => toggleSort("expiry")}
-                  className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "expiry"
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  Expiry {sortBy === "expiry" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
-                </button>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                {["name", "stock", "expiry"].map((field) => (
+                  <button key={field} onClick={() => toggleSort(field)} style={{ padding: "0.5rem 0.75rem", fontSize: "0.875rem", borderRadius: "0.75rem", border: "1px solid #d1d5db", backgroundColor: sortBy === field ? "#eef2ff" : "white", color: sortBy === field ? "#4f46e5" : "#4b5563", cursor: "pointer" }}>
+                    {field === "name" ? "Name" : field === "stock" ? "Stock" : "Expiry"}
+                    {sortBy === field && (sortOrder === "asc" ? <SortAsc size={12} style={{ display: "inline", marginLeft: "0.25rem" }} /> : <SortDesc size={12} style={{ display: "inline", marginLeft: "0.25rem" }} />)}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {sortedBatches.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-              No batches found.
-            </div>
+            <div style={{ backgroundColor: "white", borderRadius: "0.75rem", border: "1px solid #e5e7eb", padding: "3rem", textAlign: "center", color: "#9ca3af" }}>No batches found.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
               {sortedBatches.map((batch) => {
                 const status = getExpiryStatus(batch.expiryDate);
-                let statusBadge = { label: "Stable", classes: "bg-emerald-100 text-emerald-700" };
-                if (status === "red") statusBadge = { label: "Critical", classes: "bg-rose-100 text-rose-700" };
-                if (status === "yellow") statusBadge = { label: "Near expiry", classes: "bg-amber-100 text-amber-700" };
-                if (status === "expired") statusBadge = { label: "Expired", classes: "bg-gray-200 text-gray-600" };
-
-                const isLowStockItem = lowStock.some((item) => item.drug === batch.drugName?.name);
-                const unitLabel = batch.unitType
-                  ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
-                  : batch.remainingQty;
+                let statusBadge = { label: "Stable", style: { backgroundColor: "#d1fae5", color: "#065f46" } };
+                if (status === "red") statusBadge = { label: "Critical", style: { backgroundColor: "#ffe4e6", color: "#be123c" } };
+                if (status === "yellow") statusBadge = { label: "Near expiry", style: { backgroundColor: "#fef3c7", color: "#92400e" } };
+                if (status === "expired") statusBadge = { label: "Expired", style: { backgroundColor: "#e5e7eb", color: "#4b5563" } };
+                const isLowStockItem = lowStock.some(item => item.drug === batch.drugName?.name);
+                const unitLabel = batch.unitType ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}` : batch.remainingQty;
 
                 return (
-                  <div
-                    key={batch._id}
-                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group relative flex flex-col h-full"
-                  >
-                    {isLowStockItem && (
-                      <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                        <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-1 rounded-full">Low stock</span>
+                  <div key={batch._id} style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "white", borderRadius: "1rem", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)", transition: "box-shadow 0.2s", position: "relative" }}>
+                    {isLowStockItem && <span style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "#ffe4e6", color: "#be123c", fontSize: "0.625rem", fontWeight: "bold", padding: "0.25rem 0.5rem", borderRadius: "9999px", zIndex: 10 }}>Low stock</span>}
+                    <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h3 style={{ fontWeight: "bold", fontSize: "1.125rem", wordBreak: "break-word" }}>{batch.drugName?.name}</h3>
+                          {batch.drugName?.brand && <p style={{ fontSize: "0.875rem", color: "#4f46e5", wordBreak: "break-word" }}>{batch.drugName.brand}</p>}
+                        </div>
+                        <span style={{ fontSize: "0.625rem", fontWeight: "bold", padding: "0.25rem 0.5rem", borderRadius: "9999px", whiteSpace: "nowrap", ...statusBadge.style }}>{statusBadge.label}</span>
                       </div>
-                    )}
-                    <div className="p-5 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start gap-2 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-gray-900 text-lg break-words">{batch.drugName?.name}</h3>
-                          {batch.drugName?.brand && (
-                            <p className="text-sm text-indigo-600 break-words">{batch.drugName.brand}</p>
-                          )}
-                        </div>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${statusBadge.classes}`}>
-                          {statusBadge.label}
-                        </span>
+                      <div style={{ fontSize: "0.875rem", marginBottom: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "#9ca3af" }}>Batch #</span><span style={{ fontFamily: "monospace", wordBreak: "break-all", textAlign: "right", marginLeft: "0.5rem" }}>{batch.batchNumber}</span></div>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "#9ca3af" }}>Expiry</span><span style={{ fontFamily: "monospace", whiteSpace: "nowrap" }}>{new Date(batch.expiryDate).toLocaleDateString()}</span></div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ color: "#9ca3af", display: "flex", alignItems: "center", gap: "0.25rem" }}><MapPin size={12} /> Shelf</span><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginLeft: "0.5rem" }}>{batch.shelfLocation || "—"}</span></div>
                       </div>
-
-                      <div className="space-y-2 text-sm mb-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-400 shrink-0">Batch #</span>
-                          <span className="font-mono text-gray-700 text-right break-all ml-2">{batch.batchNumber}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-400 shrink-0">Expiry</span>
-                          <span className="font-mono text-gray-700 whitespace-nowrap">{new Date(batch.expiryDate).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-400 flex items-center gap-1 shrink-0">
-                            <MapPin className="w-3 h-3" /> Shelf
-                          </span>
-                          <span className="text-gray-700 truncate ml-2">{batch.shelfLocation || "—"}</span>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-gray-100 pt-4 mt-auto flex items-center justify-between">
-                        <div className="min-w-0">
-                          <p className="text-xs text-gray-400 uppercase tracking-wide">Stock / Price</p>
-                          <div className="flex flex-wrap items-baseline gap-2 mt-1">
-                            <span className="font-bold font-mono text-gray-900 break-words">{unitLabel}</span>
-                            <button
-                              onClick={() => {
-                                setPriceModal(batch._id);
-                                setNewPrice(batch.sellingPrice?.toString() || "");
-                              }}
-                              className="flex items-center gap-1 text-gray-600 font-mono hover:text-indigo-600 transition shrink-0"
-                            >
-                              ${batch.sellingPrice?.toFixed(2)}
-                              <Edit3 className="w-3 h-3" />
+                      <div style={{ borderTop: "1px solid #f3f4f6", paddingTop: "1rem", marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontSize: "0.75rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>Stock / Price</p>
+                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "0.5rem", marginTop: "0.25rem" }}>
+                            <span style={{ fontWeight: "bold", fontFamily: "monospace", wordBreak: "break-word" }}>{unitLabel}</span>
+                            <button onClick={() => { setPriceModal(batch._id); setNewPrice(batch.sellingPrice?.toString() || ""); }} style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#4b5563", fontFamily: "monospace", background: "none", border: "none", cursor: "pointer" }}>
+                              ${batch.sellingPrice?.toFixed(2)} <Edit3 size={12} />
                             </button>
                           </div>
                         </div>
-                        <button
-                          onClick={() => setSelectedBatch(batch)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white hover:bg-indigo-600 rounded-xl text-xs font-semibold transition shrink-0"
-                        >
-                          <ArrowUpDown className="w-3.5 h-3.5" /> Adjust
+                        <button onClick={() => setSelectedBatch(batch)} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.75rem", backgroundColor: "#111827", color: "white", border: "none", borderRadius: "0.75rem", fontSize: "0.75rem", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          <ArrowUpDown size={14} /> Adjust
                         </button>
                       </div>
                     </div>
@@ -389,93 +289,49 @@ const StockList = () => {
         </div>
       </div>
 
-      {/* Adjust Stock Modal */}
+      {/* Adjust Modal - same as before, but simplified */}
       {selectedBatch && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Sliders className="w-5 h-5 text-indigo-500" /> Adjust Inventory
-              </h3>
-              <button onClick={() => setSelectedBatch(null)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "1rem" }}>
+          <div style={{ backgroundColor: "white", borderRadius: "1rem", maxWidth: "28rem", width: "100%", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem", borderBottom: "1px solid #f3f4f6" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600", display: "flex", alignItems: "center", gap: "0.5rem" }}><Sliders size={20} color="#4f46e5" /> Adjust Inventory</h3>
+              <button onClick={() => setSelectedBatch(null)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
             </div>
-            <div className="p-5 space-y-4">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-xs text-gray-500 uppercase">Product</p>
-                <p className="font-bold text-gray-800">{selectedBatch.drugName?.name}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Current stock: <strong className="font-mono">{selectedBatch.remainingQty} units</strong>
-                </p>
+            <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ backgroundColor: "#f9fafb", padding: "1rem", borderRadius: "0.75rem" }}>
+                <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase" }}>Product</p>
+                <p style={{ fontWeight: "bold" }}>{selectedBatch.drugName?.name}</p>
+                <p style={{ fontSize: "0.875rem", marginTop: "0.25rem" }}>Current stock: <strong>{selectedBatch.remainingQty} units</strong></p>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Adjustment amount (+ / -)</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={adjustQty}
-                  onChange={(e) => setAdjustQty(parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g., +10 or -5"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Reason</label>
-                <input
-                  type="text"
-                  value={adjustReason}
-                  onChange={(e) => setAdjustReason(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g., damaged, restock, wastage"
-                />
-              </div>
+              <div><label style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6b7280" }}>Adjustment (+ / -)</label><input type="number" step="any" value={adjustQty} onChange={(e) => setAdjustQty(parseFloat(e.target.value))} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: "0.75rem", padding: "0.5rem", marginTop: "0.25rem" }} /></div>
+              <div><label style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6b7280" }}>Reason</label><input type="text" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: "0.75rem", padding: "0.5rem", marginTop: "0.25rem" }} placeholder="e.g., damaged, restock" /></div>
             </div>
-            <div className="flex justify-end gap-3 p-5 bg-gray-50 border-t border-gray-100">
-              <button onClick={() => setSelectedBatch(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-white transition">
-                Cancel
-              </button>
-              <button onClick={() => adjustStock(selectedBatch._id)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
-                Apply Adjustment
-              </button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", padding: "1.25rem", backgroundColor: "#f9fafb", borderTop: "1px solid #f3f4f6" }}>
+              <button onClick={() => setSelectedBatch(null)} style={{ padding: "0.5rem 1rem", border: "1px solid #d1d5db", borderRadius: "0.75rem", background: "white", cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => adjustStock(selectedBatch._id)} style={{ padding: "0.5rem 1rem", backgroundColor: "#4f46e5", color: "white", border: "none", borderRadius: "0.75rem", cursor: "pointer" }}>Apply</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Price Modal */}
+      {/* Price Modal */}
       {priceModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-indigo-500" /> Update Selling Price
-              </h3>
-              <button onClick={() => setPriceModal(null)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "1rem" }}>
+          <div style={{ backgroundColor: "white", borderRadius: "1rem", maxWidth: "28rem", width: "100%", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem", borderBottom: "1px solid #f3f4f6" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: "600", display: "flex", alignItems: "center", gap: "0.5rem" }}><DollarSign size={20} color="#4f46e5" /> Update Price</h3>
+              <button onClick={() => setPriceModal(null)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
             </div>
-            <div className="p-5">
-              <label className="block text-xs font-semibold text-gray-500 mb-1">New price (USD)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={newPrice}
-                  onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl pl-7 p-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
-                  placeholder="0.00"
-                />
+            <div style={{ padding: "1.25rem" }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "#6b7280" }}>New price (USD)</label>
+              <div style={{ position: "relative", marginTop: "0.25rem" }}>
+                <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#9ca3af" }}>$</span>
+                <input type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: "0.75rem", padding: "0.5rem 0.5rem 0.5rem 1.75rem" }} />
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-5 bg-gray-50 border-t border-gray-100">
-              <button onClick={() => setPriceModal(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-white transition">
-                Cancel
-              </button>
-              <button onClick={() => updateSellingPrice(priceModal)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
-                Save Price
-              </button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", padding: "1.25rem", backgroundColor: "#f9fafb", borderTop: "1px solid #f3f4f6" }}>
+              <button onClick={() => setPriceModal(null)} style={{ padding: "0.5rem 1rem", border: "1px solid #d1d5db", borderRadius: "0.75rem", background: "white", cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => updateSellingPrice(priceModal)} style={{ padding: "0.5rem 1rem", backgroundColor: "#4f46e5", color: "white", border: "none", borderRadius: "0.75rem", cursor: "pointer" }}>Save</button>
             </div>
           </div>
         </div>

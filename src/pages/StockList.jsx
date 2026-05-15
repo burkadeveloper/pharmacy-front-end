@@ -11,7 +11,11 @@ import {
   X,
   Package,
   Layers,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
+  Clock
 } from "lucide-react";
 
 const StockList = () => {
@@ -23,6 +27,8 @@ const StockList = () => {
   const [adjustReason, setAdjustReason] = useState("");
   const [priceModal, setPriceModal] = useState(null);
   const [newPrice, setNewPrice] = useState("");
+  const [showLowStock, setShowLowStock] = useState(true);
+  const [showExpiring, setShowExpiring] = useState(true);
 
   useEffect(() => {
     fetchBatches();
@@ -107,91 +113,126 @@ const StockList = () => {
     return "good";
   };
 
+  // Toggle sections
+  const toggleLowStock = () => setShowLowStock(!showLowStock);
+  const toggleExpiring = () => setShowExpiring(!showExpiring);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8 font-sans antialiased">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 font-sans antialiased">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Layers className="w-6 h-6 text-indigo-600" /> Stock & Inventory
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+              <Layers className="w-7 h-7 text-indigo-600" />
+              Stock Management
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Manage batches, pricing, and stock adjustments
-            </p>
+            <p className="text-gray-500 mt-1">Monitor batches, adjust inventory, and update pricing</p>
           </div>
-          <div className="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
-            <Package className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-medium text-slate-600">
-              Total batches: <strong className="text-slate-900">{batches.length}</strong>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2 flex items-center gap-2">
+            <Package className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-600">
+              Total batches: <strong className="text-gray-900 font-mono">{batches.length}</strong>
             </span>
           </div>
         </div>
 
-        {/* Alerts Section - No scrollbars, just natural flow */}
+        {/* Alerts Section – Collapsible with buttons */}
         {(lowStock.length > 0 || expiring.red?.length > 0) && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-4 mb-8">
+            {/* Low Stock Alert */}
             {lowStock.length > 0 && (
-              <div className="bg-white border-l-4 border-l-rose-500 border border-slate-200 rounded-xl p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-5 h-5 text-rose-500" />
-                  <h3 className="font-bold text-slate-800">Critical Low Stock</h3>
-                </div>
-                <ul className="space-y-2">
-                  {lowStock.map((item) => (
-                    <li key={item.drug} className="flex justify-between items-center bg-slate-50 rounded-lg px-3 py-2 text-sm">
-                      <span className="font-medium text-slate-700">{item.drug}</span>
-                      <span className="bg-rose-100 text-rose-700 font-mono font-bold px-2 py-0.5 rounded">
-                        {item.currentStock} left
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <button
+                  onClick={toggleLowStock}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-white hover:bg-rose-50/50 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="w-5 h-5 text-rose-500" />
+                    <h3 className="font-semibold text-gray-800">Low Stock Alert</h3>
+                    <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {lowStock.length} item{lowStock.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  {showLowStock ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                </button>
+                {showLowStock && (
+                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                    {lowStock.map((item) => (
+                      <div key={item.drug} className="flex justify-between items-center p-4 hover:bg-gray-50">
+                        <div>
+                          <p className="font-medium text-gray-800">{item.drug}</p>
+                          <p className="text-xs text-gray-400">Minimum threshold: {item.minStock || 10}</p>
+                        </div>
+                        <div className="bg-rose-100 text-rose-700 font-bold font-mono px-3 py-1 rounded-full text-sm">
+                          {item.currentStock} left
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
+            {/* Expiring Soon Alert */}
             {expiring.red?.length > 0 && (
-              <div className="bg-white border-l-4 border-l-amber-500 border border-slate-200 rounded-xl p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-5 h-5 text-amber-500" />
-                  <h3 className="font-bold text-slate-800">Expiring Soon (&lt;30 days)</h3>
-                </div>
-                <ul className="space-y-2">
-                  {expiring.red.map((b) => (
-                    <li key={b._id} className="bg-slate-50 rounded-lg px-3 py-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-slate-700">{b.drugName?.name}</span>
-                        <span className="text-amber-700 font-mono text-xs bg-amber-50 px-2 py-0.5 rounded">
-                          {new Date(b.expiryDate).toLocaleDateString()}
-                        </span>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <button
+                  onClick={toggleExpiring}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-white hover:bg-amber-50/50 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-amber-600" />
+                    <h3 className="font-semibold text-gray-800">Expiring Soon (≤30 days)</h3>
+                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {expiring.red.length} batch{expiring.red.length !== 1 ? "es" : ""}
+                    </span>
+                  </div>
+                  {showExpiring ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                </button>
+                {showExpiring && (
+                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                    {expiring.red.map((batch) => (
+                      <div key={batch._id} className="p-4 hover:bg-gray-50">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-800">{batch.drugName?.name}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">Batch: {batch.batchNumber}</p>
+                          </div>
+                          <span className="text-amber-700 font-mono text-sm bg-amber-50 px-2 py-1 rounded">
+                            {new Date(batch.expiryDate).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-xs text-slate-400 mt-0.5">Batch: {b.batchNumber}</div>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Batches Grid - Responsive, no internal scrollbars */}
-        <div className="mt-8">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Active Batches</h2>
+        {/* Batches Grid – Professional Cards */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-indigo-500" />
+            Active Batches
+          </h2>
           {batches.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 font-medium shadow-sm">
-              No batches found.
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+              No batches available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {batches.map((batch) => {
                 const status = getExpiryStatus(batch.expiryDate);
-                let statusColor = {
-                  text: "Stable",
-                  bg: "bg-emerald-100 text-emerald-700",
+                let statusBadge = {
+                  label: "Stable",
+                  classes: "bg-emerald-100 text-emerald-700",
                 };
-                if (status === "red") statusColor = { text: "Critical", bg: "bg-rose-100 text-rose-700" };
-                if (status === "yellow") statusColor = { text: "Near expiry", bg: "bg-amber-100 text-amber-700" };
-                if (status === "expired") statusColor = { text: "Expired", bg: "bg-slate-200 text-slate-600" };
+                if (status === "red") statusBadge = { label: "Critical", classes: "bg-rose-100 text-rose-700" };
+                if (status === "yellow") statusBadge = { label: "Near expiry", classes: "bg-amber-100 text-amber-700" };
+                if (status === "expired") statusBadge = { label: "Expired", classes: "bg-gray-200 text-gray-600" };
 
                 const unitLabel = batch.unitType
                   ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
@@ -200,60 +241,62 @@ const StockList = () => {
                 return (
                   <div
                     key={batch._id}
-                    className={`bg-white rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex flex-col ${
-                      status === "expired" ? "opacity-70 border-slate-200" : "border-slate-200"
-                    }`}
+                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-bold text-slate-900 text-base">{batch.drugName?.name}</h3>
-                        {batch.drugName?.brand && (
-                          <span className="text-xs text-indigo-600">{batch.drugName.brand}</span>
-                        )}
+                    <div className="p-5">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-lg">{batch.drugName?.name}</h3>
+                          {batch.drugName?.brand && (
+                            <p className="text-sm text-indigo-600">{batch.drugName.brand}</p>
+                          )}
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${statusBadge.classes}`}>
+                          {statusBadge.label}
+                        </span>
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor.bg}`}>
-                        {statusColor.text}
-                      </span>
-                    </div>
 
-                    <div className="space-y-2 my-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Batch #</span>
-                        <span className="font-mono font-medium text-slate-800">{batch.batchNumber}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Expiry</span>
-                        <span className="font-mono text-slate-800">{new Date(batch.expiryDate).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> Shelf</span>
-                        <span className="text-slate-800">{batch.shelfLocation || "—"}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-slate-400 uppercase tracking-wider">Stock / Price</div>
-                        <div className="flex items-baseline gap-2 mt-0.5">
-                          <span className="font-bold font-mono text-slate-900">{unitLabel}</span>
-                          <button
-                            onClick={() => {
-                              setPriceModal(batch._id);
-                              setNewPrice(batch.sellingPrice?.toString() || "");
-                            }}
-                            className="flex items-center gap-1 text-slate-900 font-mono font-bold hover:text-indigo-600 transition"
-                          >
-                            ${batch.sellingPrice?.toFixed(2)}
-                            <Edit3 className="w-3 h-3" />
-                          </button>
+                      <div className="space-y-2 text-sm mb-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Batch #</span>
+                          <span className="font-mono text-gray-700">{batch.batchNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Expiry</span>
+                          <span className="font-mono text-gray-700">{new Date(batch.expiryDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> Shelf
+                          </span>
+                          <span className="text-gray-700">{batch.shelfLocation || "—"}</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setSelectedBatch(batch)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-white hover:bg-indigo-600 rounded-lg text-xs font-semibold transition"
-                      >
-                        <ArrowUpDown className="w-3.5 h-3.5" /> Adjust
-                      </button>
+
+                      <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase tracking-wide">Stock / Price</p>
+                          <div className="flex items-baseline gap-2 mt-1">
+                            <span className="font-bold font-mono text-gray-900">{unitLabel}</span>
+                            <button
+                              onClick={() => {
+                                setPriceModal(batch._id);
+                                setNewPrice(batch.sellingPrice?.toString() || "");
+                              }}
+                              className="flex items-center gap-1 text-gray-600 font-mono hover:text-indigo-600 transition"
+                            >
+                              ${batch.sellingPrice?.toFixed(2)}
+                              <Edit3 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedBatch(batch)}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white hover:bg-indigo-600 rounded-xl text-xs font-semibold transition"
+                        >
+                          <ArrowUpDown className="w-3.5 h-3.5" /> Adjust
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -267,47 +310,47 @@ const StockList = () => {
       {selectedBatch && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
-            <div className="flex justify-between items-center p-5 border-b border-slate-100">
-              <h3 className="text-lg font-semibold flex items-center gap-2 text-slate-800">
-                <Sliders className="w-5 h-5 text-indigo-500" /> Adjust Stock
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-indigo-500" /> Adjust Inventory
               </h3>
-              <button onClick={() => setSelectedBatch(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setSelectedBatch(null)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-slate-50 rounded-xl p-4 text-sm">
-                <p className="text-slate-500 text-xs uppercase">Product</p>
-                <p className="font-bold text-slate-800">{selectedBatch.drugName?.name}</p>
-                <p className="text-slate-600 mt-1">Current stock: <strong className="font-mono">{selectedBatch.remainingQty} units</strong></p>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs text-gray-500 uppercase">Product</p>
+                <p className="font-bold text-gray-800">{selectedBatch.drugName?.name}</p>
+                <p className="text-sm text-gray-600 mt-1">Current stock: <strong className="font-mono">{selectedBatch.remainingQty} units</strong></p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Adjustment (positive or negative)</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Adjustment amount (+ / -)</label>
                 <input
                   type="number"
                   step="any"
                   value={adjustQty}
                   onChange={(e) => setAdjustQty(parseFloat(e.target.value))}
-                  className="w-full rounded-lg border-slate-200 p-2 text-sm"
+                  className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="e.g., +10 or -5"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Reason</label>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Reason</label>
                 <input
                   type="text"
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  className="w-full rounded-lg border-slate-200 p-2 text-sm"
-                  placeholder="e.g., damaged, restock"
+                  className="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., damaged, restock, wastage"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-5 bg-slate-50 border-t border-slate-100">
-              <button onClick={() => setSelectedBatch(null)} className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-white transition">
+            <div className="flex justify-end gap-3 p-5 bg-gray-50 border-t border-gray-100">
+              <button onClick={() => setSelectedBatch(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-white transition">
                 Cancel
               </button>
-              <button onClick={() => adjustStock(selectedBatch._id)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+              <button onClick={() => adjustStock(selectedBatch._id)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
                 Apply Adjustment
               </button>
             </div>
@@ -319,33 +362,33 @@ const StockList = () => {
       {priceModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
-            <div className="flex justify-between items-center p-5 border-b border-slate-100">
-              <h3 className="text-lg font-semibold flex items-center gap-2 text-slate-800">
-                <DollarSign className="w-5 h-5 text-indigo-500" /> Update Price
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-indigo-500" /> Update Selling Price
               </h3>
-              <button onClick={() => setPriceModal(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setPriceModal(null)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-5">
-              <label className="block text-xs font-semibold text-slate-500 mb-1">New selling price (USD)</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">New price (USD)</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
                 <input
                   type="number"
                   step="0.01"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full rounded-lg border-slate-200 pl-7 p-2 text-sm"
+                  className="w-full border border-gray-300 rounded-xl pl-7 p-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
                   placeholder="0.00"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-5 bg-slate-50 border-t border-slate-100">
-              <button onClick={() => setPriceModal(null)} className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-white transition">
+            <div className="flex justify-end gap-3 p-5 bg-gray-50 border-t border-gray-100">
+              <button onClick={() => setPriceModal(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-white transition">
                 Cancel
               </button>
-              <button onClick={() => updateSellingPrice(priceModal)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+              <button onClick={() => updateSellingPrice(priceModal)} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
                 Save Price
               </button>
             </div>

@@ -17,7 +17,6 @@ import {
   TrendingDown,
   Clock,
   Search,
-  Filter,
   SortAsc,
   SortDesc
 } from "lucide-react";
@@ -33,10 +32,8 @@ const StockList = () => {
   const [newPrice, setNewPrice] = useState("");
   const [showLowStock, setShowLowStock] = useState(true);
   const [showExpiring, setShowExpiring] = useState(true);
-  
-  // New state for batch filtering/sorting
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("expiry"); // name, stock, expiry
+  const [sortBy, setSortBy] = useState("expiry");
   const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
@@ -122,17 +119,17 @@ const StockList = () => {
     return "good";
   };
 
-  // Filter and sort batches
-  const filteredBatches = batches.filter(batch =>
+  // Filter & sort batches
+  const filteredBatches = batches.filter((batch) =>
     batch.drugName?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     batch.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedBatches = [...filteredBatches].sort((a, b) => {
     if (sortBy === "name") {
-      return sortOrder === "asc"
-        ? (a.drugName?.name || "").localeCompare(b.drugName?.name || "")
-        : (b.drugName?.name || "").localeCompare(a.drugName?.name || "");
+      const nameA = a.drugName?.name || "";
+      const nameB = b.drugName?.name || "";
+      return sortOrder === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
     } else if (sortBy === "stock") {
       return sortOrder === "asc" ? a.remainingQty - b.remainingQty : b.remainingQty - a.remainingQty;
     } else if (sortBy === "expiry") {
@@ -175,7 +172,7 @@ const StockList = () => {
           </div>
         </div>
 
-        {/* Alerts Section – Collapsible */}
+        {/* Alerts Section */}
         {(lowStock.length > 0 || expiring.red?.length > 0) && (
           <div className="space-y-4 mb-8">
             {lowStock.length > 0 && (
@@ -248,7 +245,7 @@ const StockList = () => {
           </div>
         )}
 
-        {/* Active Batches Section with Search and Sort */}
+        {/* Active Batches Section */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
@@ -256,7 +253,6 @@ const StockList = () => {
               Active Batches
             </h2>
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -267,12 +263,13 @@ const StockList = () => {
                   className="pl-9 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64"
                 />
               </div>
-              {/* Sort buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={() => toggleSort("name")}
                   className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "name" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                    sortBy === "name"
+                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
@@ -280,7 +277,9 @@ const StockList = () => {
                 <button
                   onClick={() => toggleSort("stock")}
                   className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "stock" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                    sortBy === "stock"
+                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   Stock {sortBy === "stock" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
@@ -288,7 +287,9 @@ const StockList = () => {
                 <button
                   onClick={() => toggleSort("expiry")}
                   className={`px-3 py-2 text-sm rounded-xl border transition ${
-                    sortBy === "expiry" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                    sortBy === "expiry"
+                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                      : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   Expiry {sortBy === "expiry" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
@@ -302,18 +303,15 @@ const StockList = () => {
               No batches found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedBatches.map((batch) => {
                 const status = getExpiryStatus(batch.expiryDate);
-                let statusBadge = {
-                  label: "Stable",
-                  classes: "bg-emerald-100 text-emerald-700",
-                };
+                let statusBadge = { label: "Stable", classes: "bg-emerald-100 text-emerald-700" };
                 if (status === "red") statusBadge = { label: "Critical", classes: "bg-rose-100 text-rose-700" };
                 if (status === "yellow") statusBadge = { label: "Near expiry", classes: "bg-amber-100 text-amber-700" };
                 if (status === "expired") statusBadge = { label: "Expired", classes: "bg-gray-200 text-gray-600" };
 
-                const isLowStockItem = lowStock.some(item => item.drug === batch.drugName?.name);
+                const isLowStockItem = lowStock.some((item) => item.drug === batch.drugName?.name);
                 const unitLabel = batch.unitType
                   ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
                   : batch.remainingQty;
@@ -321,54 +319,54 @@ const StockList = () => {
                 return (
                   <div
                     key={batch._id}
-                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group relative"
+                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group relative flex flex-col h-full"
                   >
                     {isLowStockItem && (
-                      <div className="absolute top-0 right-0 mt-2 mr-2">
+                      <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
                         <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-1 rounded-full">Low stock</span>
                       </div>
                     )}
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{batch.drugName?.name}</h3>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start gap-2 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-gray-900 text-lg break-words">{batch.drugName?.name}</h3>
                           {batch.drugName?.brand && (
-                            <p className="text-sm text-indigo-600">{batch.drugName.brand}</p>
+                            <p className="text-sm text-indigo-600 break-words">{batch.drugName.brand}</p>
                           )}
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${statusBadge.classes}`}>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${statusBadge.classes}`}>
                           {statusBadge.label}
                         </span>
                       </div>
 
                       <div className="space-y-2 text-sm mb-4">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Batch #</span>
-                          <span className="font-mono text-gray-700">{batch.batchNumber}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Expiry</span>
-                          <span className="font-mono text-gray-700">{new Date(batch.expiryDate).toLocaleDateString()}</span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400 shrink-0">Batch #</span>
+                          <span className="font-mono text-gray-700 text-right break-all ml-2">{batch.batchNumber}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400 flex items-center gap-1">
+                          <span className="text-gray-400 shrink-0">Expiry</span>
+                          <span className="font-mono text-gray-700 whitespace-nowrap">{new Date(batch.expiryDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400 flex items-center gap-1 shrink-0">
                             <MapPin className="w-3 h-3" /> Shelf
                           </span>
-                          <span className="text-gray-700">{batch.shelfLocation || "—"}</span>
+                          <span className="text-gray-700 truncate ml-2">{batch.shelfLocation || "—"}</span>
                         </div>
                       </div>
 
-                      <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
-                        <div>
+                      <div className="border-t border-gray-100 pt-4 mt-auto flex items-center justify-between">
+                        <div className="min-w-0">
                           <p className="text-xs text-gray-400 uppercase tracking-wide">Stock / Price</p>
-                          <div className="flex items-baseline gap-2 mt-1">
-                            <span className="font-bold font-mono text-gray-900">{unitLabel}</span>
+                          <div className="flex flex-wrap items-baseline gap-2 mt-1">
+                            <span className="font-bold font-mono text-gray-900 break-words">{unitLabel}</span>
                             <button
                               onClick={() => {
                                 setPriceModal(batch._id);
                                 setNewPrice(batch.sellingPrice?.toString() || "");
                               }}
-                              className="flex items-center gap-1 text-gray-600 font-mono hover:text-indigo-600 transition"
+                              className="flex items-center gap-1 text-gray-600 font-mono hover:text-indigo-600 transition shrink-0"
                             >
                               ${batch.sellingPrice?.toFixed(2)}
                               <Edit3 className="w-3 h-3" />
@@ -377,7 +375,7 @@ const StockList = () => {
                         </div>
                         <button
                           onClick={() => setSelectedBatch(batch)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white hover:bg-indigo-600 rounded-xl text-xs font-semibold transition"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white hover:bg-indigo-600 rounded-xl text-xs font-semibold transition shrink-0"
                         >
                           <ArrowUpDown className="w-3.5 h-3.5" /> Adjust
                         </button>
@@ -391,7 +389,6 @@ const StockList = () => {
         </div>
       </div>
 
-      {/* Modals remain the same as before */}
       {/* Adjust Stock Modal */}
       {selectedBatch && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -408,7 +405,9 @@ const StockList = () => {
               <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-xs text-gray-500 uppercase">Product</p>
                 <p className="font-bold text-gray-800">{selectedBatch.drugName?.name}</p>
-                <p className="text-sm text-gray-600 mt-1">Current stock: <strong className="font-mono">{selectedBatch.remainingQty} units</strong></p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Current stock: <strong className="font-mono">{selectedBatch.remainingQty} units</strong>
+                </p>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1">Adjustment amount (+ / -)</label>

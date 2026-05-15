@@ -1,7 +1,10 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
+  // Checks for Vercel's variable in production; falls back to your local "/api" proxy
+  baseURL: import.meta.env.VITE_API_URL 
+    ? `${import.meta.env.VITE_API_URL}/api` 
+    : "/api",
   headers: { "Content-Type": "application/json" },
 });
 

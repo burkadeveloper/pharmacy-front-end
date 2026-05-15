@@ -1,37 +1,19 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  // ✅ FIX: Add /api suffix
-  baseURL: import.meta.env.VITE_API_URL || 'https://pharmacy-api-vsjs.onrender.com/api',
-  headers: { 'Content-Type': 'application/json' },
+  // Checks for Vercel's variable in production; falls back to your local "/api" proxy
+  baseURL: import.meta.env.VITE_API_URL 
+    ? `${import.meta.env.VITE_API_URL}/api` 
+    : "/api",
+  headers: { "Content-Type": "application/json" },
 });
 
-// Request interceptor to add token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Ensure error message is always a string
-    if (!error.response) {
-      error.message = 'Network error – please check your connection';
-    } else if (!error.response.data?.message) {
-      error.message = `Server error: ${error.response.status}`;
-    } else {
-      error.message = error.response.data.message;
-    }
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
 export default api;

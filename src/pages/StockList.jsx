@@ -3,15 +3,15 @@ import api from "../api/client";
 import toast from "react-hot-toast";
 import {
   AlertTriangle,
-  Layers,
   Calendar,
   Edit3,
   Sliders,
   MapPin,
   DollarSign,
   X,
-  TrendingUp,
   Package,
+  Layers,
+  ArrowUpDown
 } from "lucide-react";
 
 const StockList = () => {
@@ -108,379 +108,261 @@ const StockList = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 py-6 font-sans antialiased selection:bg-indigo-100">
-      {/* Dynamic Dashboard Section Header */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm sm:flex sm:items-center sm:justify-between">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 py-8 font-sans antialiased selection:bg-indigo-100 bg-slate-50/50 min-h-screen">
+      
+      {/* Mini clean overview header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-slate-950 tracking-tight leading-none">
-            Stock Batches
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Layers className="w-5 h-5 text-indigo-600" /> Stock Metrics & Management
           </h1>
-          <p className="text-base text-slate-500 mt-2 font-normal leading-relaxed">
-            Monitor storage configurations, maintain unit pricing structures,
-            and handle audit adjustments.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Audit configurations, pricing adjustments, and live batch monitoring.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex gap-4 text-sm font-medium text-slate-600">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-lg">
-            <Package className="w-4 h-4 text-indigo-500" />
-            <span>
-              Total Records:{" "}
-              <strong className="text-slate-950 font-bold font-mono">
-                {batches.length}
-              </strong>
-            </span>
-          </div>
+        <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs self-start sm:self-auto">
+          <Package className="w-4 h-4 text-slate-400" />
+          <span className="text-xs font-medium text-slate-600">
+            Total Logs: <strong className="text-slate-900 font-mono font-bold">{batches.length}</strong>
+          </span>
         </div>
       </div>
 
-      {/* Critical Insights Engine Section */}
+      {/* High-Alert Dashboard Cards Grid */}
       {(lowStock.length > 0 || expiring.red?.length > 0) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Low Stock Panel Card */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Low Stock Panel */}
           {lowStock.length > 0 && (
-            <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-6 shadow-xs">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="p-2 bg-rose-100 rounded-lg text-rose-700">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-                <h3 className="font-bold text-rose-950 text-base leading-none">
-                  Low Stock Alert
-                </h3>
+            <div className="bg-white border-l-4 border-l-rose-500 border border-slate-200 rounded-xl p-4 shadow-xs">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                <h3 className="font-bold text-slate-900 text-sm">Critical Low Stock</h3>
               </div>
-              <div className="max-h-48 overflow-y-auto pr-1">
-                <ul className="space-y-2.5">
-                  {lowStock.map((item) => (
-                    <li
-                      key={item.drug}
-                      className="flex justify-between items-center text-sm bg-white border border-rose-200/60 rounded-lg p-3 shadow-2xs"
-                    >
-                      <span className="font-bold text-slate-900 tracking-tight">
-                        {item.drug}
+              <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                {lowStock.map((item) => (
+                  <div key={item.drug} className="flex justify-between items-center text-xs bg-slate-50 border border-slate-150 rounded-lg p-2.5">
+                    <span className="font-semibold text-slate-800">{item.drug}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold font-mono">
+                        {item.currentStock} left
                       </span>
-                      <div className="flex items-center gap-3">
-                        <span className="px-2.5 py-1 rounded-md bg-rose-100 text-rose-900 font-bold font-mono text-xs">
-                          {item.currentStock} units
-                        </span>
-                        <span className="text-slate-500 font-medium font-mono text-xs">
-                          (threshold {item.threshold})
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Critical Expiry Alerts Panel Card */}
+          {/* Critical Expiry Alerts */}
           {expiring.red?.length > 0 && (
-            <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-6 shadow-xs">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="p-2 bg-amber-100 rounded-lg text-amber-700">
-                  <Calendar className="w-4 h-4" />
-                </div>
-                <h3 className="font-bold text-amber-950 text-base leading-none">
-                  Expiring in &lt;30 days (Red Alert)
-                </h3>
+            <div className="bg-white border-l-4 border-l-amber-500 border border-slate-200 rounded-xl p-4 shadow-xs">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="w-4 h-4 text-amber-500" />
+                <h3 className="font-bold text-slate-900 text-sm">Approaching Expiration (&lt;30 days)</h3>
               </div>
-              <div className="max-h-48 overflow-y-auto pr-1">
-                <div className="space-y-2.5">
-                  {expiring.red.map((b) => (
-                    <div
-                      key={b._id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm bg-white border border-amber-200/60 rounded-lg p-3 gap-2 shadow-2xs"
-                    >
-                      <div>
-                        <span className="font-bold text-slate-900 tracking-tight">
-                          {b.drugName?.name}
-                        </span>
-                        {b.drugName?.brand && (
-                          <span className="text-slate-500 font-normal ml-1.5 text-xs bg-slate-100 px-1.5 py-0.5 rounded">
-                            ({b.drugName.brand})
-                          </span>
-                        )}
-                        <div className="text-xs text-slate-500 font-mono mt-1">
-                          Batch: {b.batchNumber}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-3 text-right">
-                        <div className="text-left sm:text-right">
-                          <span className="text-xs text-amber-800 font-bold font-mono block">
-                            Expires{" "}
-                            {new Date(b.expiryDate).toLocaleDateString()}
-                          </span>
-                          <span className="text-xs text-slate-600 block font-semibold font-mono mt-0.5">
-                            Qty {b.remainingQty} {b.unitType}s
-                          </span>
-                        </div>
-                      </div>
+              <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                {expiring.red.map((b) => (
+                  <div key={b._id} className="flex justify-between items-center text-xs bg-slate-50 border border-slate-150 rounded-lg p-2.5">
+                    <div>
+                      <span className="font-semibold text-slate-800 block">{b.drugName?.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">Batch: {b.batchNumber}</span>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-amber-700 font-bold font-mono bg-amber-50 px-2 py-0.5 rounded">
+                      {new Date(b.expiryDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Main Stock Inventory Ledger Data Matrix */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50 text-slate-700 font-bold uppercase tracking-wider text-xs">
-              <tr>
-                <th className="px-6 py-4 text-left">Drug</th>
-                <th className="px-6 py-4 text-left">Brand</th>
-                <th className="px-6 py-4 text-left">Batch</th>
-                <th className="px-6 py-4 text-left">Expiry</th>
-                <th className="px-6 py-4 text-left">Qty Left</th>
-                <th className="px-6 py-4 text-left">Selling Price</th>
-                <th className="px-6 py-4 text-left">Location</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white text-slate-800">
-              {batches.map((batch) => {
-                const status = getExpiryStatus(batch.expiryDate);
+      {/* Main Grid Matrix Items Layout */}
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Active Batches In Store</h2>
+        
+        {batches.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-sm text-slate-400 font-medium shadow-2xs">
+            No active drug validation batches logged within current store instance.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {batches.map((batch) => {
+              const status = getExpiryStatus(batch.expiryDate);
+              
+              // Clean card layouts based on tier conditions
+              let statusLabel = { text: "Stable Asset", style: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+              if (status === "red") statusLabel = { text: "Critical Expiry", style: "bg-rose-50 text-rose-700 border-rose-200" };
+              if (status === "yellow") statusLabel = { text: "Near Expiry", style: "bg-amber-50 text-amber-700 border-amber-200" };
+              if (status === "expired") statusLabel = { text: "Expired Item", style: "bg-slate-100 text-slate-600 border-slate-300 opacity-60" };
 
-                let conditionalRowStyle = "hover:bg-slate-50/50";
-                if (status === "red")
-                  conditionalRowStyle =
-                    "bg-rose-50/40 hover:bg-rose-50/70 border-l-4 border-l-rose-500";
-                if (status === "yellow")
-                  conditionalRowStyle =
-                    "bg-amber-50/40 hover:bg-amber-50/70 border-l-4 border-l-amber-500";
-                if (status === "expired")
-                  conditionalRowStyle =
-                    "bg-slate-100 hover:bg-slate-200/70 opacity-70";
+              const unitLabel = batch.unitType
+                ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
+                : batch.remainingQty;
 
-                const unitLabel = batch.unitType
-                  ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
-                  : batch.remainingQty;
-
-                return (
-                  <tr
-                    key={batch._id}
-                    className={`transition-colors align-middle text-sm ${conditionalRowStyle}`}
-                  >
-                    <td className="px-6 py-4.5">
-                      <div className="font-bold text-slate-950 text-[15px] tracking-tight">
-                        {batch.drugName?.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4.5 text-slate-600 font-semibold">
-                      {batch.drugName?.brand || "-"}
-                    </td>
-                    <td className="px-6 py-4.5">
-                      <span className="font-mono bg-slate-100 px-2.5 py-1 rounded text-xs font-bold text-slate-700 border border-slate-200/60 shadow-2xs">
-                        {batch.batchNumber}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4.5">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 font-mono">
-                          {new Date(batch.expiryDate).toLocaleDateString()}
-                        </span>
-                        {status === "red" && (
-                          <span className="text-[10px] text-rose-700 font-extrabold uppercase tracking-widest mt-1">
-                            Critical Expiry
-                          </span>
-                        )}
-                        {status === "yellow" && (
-                          <span className="text-[10px] text-amber-700 font-extrabold uppercase tracking-widest mt-1">
-                            Near Expiry
-                          </span>
-                        )}
-                        {status === "expired" && (
-                          <span className="text-[10px] text-slate-700 font-extrabold uppercase tracking-widest mt-1">
-                            Expired Asset
+              return (
+                <div 
+                  key={batch._id} 
+                  className={`bg-white rounded-xl border p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between ${
+                    status === "expired" ? "border-slate-200 bg-slate-50/50" : "border-slate-200"
+                  }`}
+                >
+                  <div>
+                    {/* Card Label and Expiry Badges */}
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-base tracking-tight leading-snug">
+                          {batch.drugName?.name}
+                        </h3>
+                        {batch.drugName?.brand && (
+                          <span className="text-xs text-indigo-600 font-medium">
+                            {batch.drugName.brand}
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4.5">
-                      <span className="font-bold text-slate-950 font-mono bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200/40 shadow-2xs">
-                        {unitLabel}
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border tracking-wide whitespace-nowrap ${statusLabel.style}`}>
+                        {statusLabel.text}
                       </span>
-                    </td>
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-1.5 group">
-                        <span className="font-bold text-slate-950 font-mono text-[15px]">
-                          ${batch.sellingPrice?.toFixed(2)}
+                    </div>
+
+                    {/* Meta rows block layout */}
+                    <div className="space-y-2 my-4 pt-1 text-xs text-slate-600">
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                        <span className="text-slate-400">Batch Code</span>
+                        <span className="font-mono font-semibold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">{batch.batchNumber}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                        <span className="text-slate-400">Expiration</span>
+                        <span className="font-mono font-bold text-slate-900">{new Date(batch.expiryDate).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                        <span className="text-slate-400">Location Shelf</span>
+                        <span className="flex items-center gap-1 font-medium text-slate-800">
+                          <MapPin className="w-3 h-3 text-slate-400" /> {batch.shelfLocation || "-"}
                         </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions and Metrics dynamic row footer */}
+                  <div className="pt-3 mt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Inventory / Price</span>
+                      <div className="flex items-baseline gap-2 mt-0.5">
+                        <span className="font-bold font-mono text-slate-900 text-sm">{unitLabel}</span>
+                        <span className="text-slate-300 text-xs">|</span>
                         <button
                           onClick={() => {
                             setPriceModal(batch._id);
                             setNewPrice(batch.sellingPrice);
                           }}
-                          className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors opacity-80 group-hover:opacity-100"
-                          title="Modify Pricing Index"
+                          className="group flex items-center gap-1 text-slate-900 font-bold font-mono hover:text-indigo-600 transition-colors"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          ${batch.sellingPrice?.toFixed(2)}
+                          <Edit3 className="w-3 h-3 text-slate-400 group-hover:text-indigo-500" />
                         </button>
                       </div>
-                    </td>
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-1.5 text-slate-600 font-semibold">
-                        <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>{batch.shelfLocation || "-"}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4.5 text-right">
-                      <button
-                        onClick={() => setSelectedBatch(batch)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-950 text-white font-bold text-xs uppercase tracking-wider rounded-lg hover:bg-indigo-600 transition-colors shadow-sm focus:ring-2 focus:ring-slate-900 focus:ring-offset-1"
-                      >
-                        <Sliders className="w-3.5 h-3.5" /> Adjust
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {batches.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="text-center p-16 text-slate-400 font-semibold text-base"
-                  >
-                    No active drug validation batches logged within current
-                    instance framework.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedBatch(batch)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-900 text-white hover:bg-indigo-600 rounded-lg text-xs font-semibold transition-colors shadow-2xs"
+                    >
+                      <ArrowUpDown className="w-3 h-3" /> Adjust
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Adjust Stock Audit Modal Overlay Sheet */}
+      {/* Adjust Stock Audit Modal */}
       {selectedBatch && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full border border-slate-200 flex flex-col transform transition-all scale-100">
-            <div className="px-6 py-4.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-xl">
-              <h3 className="text-base font-bold text-slate-950 flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-indigo-500" /> Audit Inventory
-                Control
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full border border-slate-200 flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-150 flex justify-between items-center bg-slate-50">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <Sliders className="w-4 h-4 text-indigo-500" /> Inventory Audit Adjustment
               </h3>
-              <button
-                onClick={() => setSelectedBatch(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200 transition-colors"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setSelectedBatch(null)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                <X className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="p-6 space-y-5">
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-4.5">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  Target Variant
-                </div>
-                <div className="text-base font-bold text-slate-950 mt-1 tracking-tight">
-                  {selectedBatch.drugName?.name}
-                  {selectedBatch.drugName?.brand && (
-                    <span className="font-semibold text-sm text-slate-500 ml-1.5">
-                      ({selectedBatch.drugName.brand})
-                    </span>
-                  )}
-                </div>
-                <div className="mt-3 pt-3 border-t border-slate-200/60 flex justify-between items-center text-sm font-medium text-slate-600">
-                  <span>Current Balanced Quantity:</span>
-                  <strong className="text-slate-950 bg-white px-2.5 py-1 rounded border font-bold font-mono text-xs">
-                    {selectedBatch.remainingQty} {selectedBatch.unitType}s
-                  </strong>
-                </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs">
+                <span className="text-slate-400 uppercase tracking-wider font-semibold block text-[10px]">Product Context</span>
+                <span className="font-bold text-slate-900 text-sm mt-0.5 block">{selectedBatch.drugName?.name}</span>
+                <span className="text-slate-500 block mt-1">Current Balanced Quantity: <strong className="font-mono text-slate-900 font-bold">{selectedBatch.remainingQty} units</strong></span>
               </div>
-
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                  Adjustment (+/-) in {selectedBatch.unitType}s
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Delta Modifier (+ / -)</label>
                 <input
                   type="number"
                   step="any"
                   value={adjustQty}
                   onChange={(e) => setAdjustQty(parseFloat(e.target.value))}
-                  className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base p-2.5 font-bold font-mono"
+                  className="w-full rounded-lg border-slate-300 font-bold font-mono text-sm p-2"
                 />
               </div>
-
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                  Reason
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Log Action Reason</label>
                 <input
                   type="text"
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-2.5 font-medium"
-                  placeholder="e.g., damaged, expiry adjustment"
+                  className="w-full rounded-lg border-slate-300 text-xs p-2"
+                  placeholder="e.g., damaged, inventory balancing audit"
                 />
               </div>
             </div>
-
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 rounded-b-xl">
-              <button
-                onClick={() => setSelectedBatch(null)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-bold text-sm rounded-lg transition-colors"
-              >
+            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-150 flex justify-end gap-2">
+              <button onClick={() => setSelectedBatch(null)} className="px-3 py-1.5 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold text-xs rounded-lg transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={() => adjustStock(selectedBatch._id)}
-                className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 font-bold text-sm rounded-lg shadow-sm transition-colors"
-              >
-                Save Changes
+              <button onClick={() => adjustStock(selectedBatch._id)} className="px-3 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 font-semibold text-xs rounded-lg transition-colors">
+                Save Adjustment
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Selling Price Modal Overlay Sheet */}
+      {/* Edit Selling Price Modal */}
       {priceModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full border border-slate-200 flex flex-col">
-            <div className="px-6 py-4.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-xl">
-              <h3 className="text-base font-bold text-slate-950 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-indigo-500" /> Edit Selling
-                Price
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-xs w-full border border-slate-200 flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-150 flex justify-between items-center bg-slate-50">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <DollarSign className="w-4 h-4 text-indigo-500" /> Modify Market Rate
               </h3>
-              <button
-                onClick={() => setPriceModal(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200 transition-colors"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setPriceModal(null)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                <X className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="p-6">
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-slate-400 text-base font-bold">$</span>
+            <div className="p-5">
+              <div className="relative rounded-lg shadow-2xs">
+                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                  <span className="text-slate-400 text-xs font-bold">$</span>
                 </div>
                 <input
                   type="number"
                   step="0.01"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full rounded-lg border-slate-300 pl-8 pr-4 py-2.5 focus:border-indigo-500 focus:ring-indigo-500 text-base font-bold font-mono text-slate-950"
+                  className="w-full rounded-lg border-slate-300 pl-6 pr-3 py-2 font-bold font-mono text-sm text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="0.00"
                 />
               </div>
             </div>
-
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 rounded-b-xl">
-              <button
-                onClick={() => setPriceModal(null)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-bold text-sm rounded-lg transition-colors"
-              >
+            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-150 flex justify-end gap-2">
+              <button onClick={() => setPriceModal(null)} className="px-3 py-1.5 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold text-xs rounded-lg transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={() => updateSellingPrice(priceModal)}
-                className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 font-bold text-sm rounded-lg shadow-sm transition-colors"
-              >
-                Update Index
+              <button onClick={() => updateSellingPrice(priceModal)} className="px-3 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 font-semibold text-xs rounded-lg transition-colors">
+                Update Rate
               </button>
             </div>
           </div>

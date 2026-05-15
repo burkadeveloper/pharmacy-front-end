@@ -15,7 +15,11 @@ import {
   ChevronDown,
   ChevronUp,
   TrendingDown,
-  Clock
+  Clock,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc
 } from "lucide-react";
 
 const StockList = () => {
@@ -29,6 +33,11 @@ const StockList = () => {
   const [newPrice, setNewPrice] = useState("");
   const [showLowStock, setShowLowStock] = useState(true);
   const [showExpiring, setShowExpiring] = useState(true);
+  
+  // New state for batch filtering/sorting
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("expiry"); // name, stock, expiry
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     fetchBatches();
@@ -113,7 +122,36 @@ const StockList = () => {
     return "good";
   };
 
-  // Toggle sections
+  // Filter and sort batches
+  const filteredBatches = batches.filter(batch =>
+    batch.drugName?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    batch.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedBatches = [...filteredBatches].sort((a, b) => {
+    if (sortBy === "name") {
+      return sortOrder === "asc"
+        ? (a.drugName?.name || "").localeCompare(b.drugName?.name || "")
+        : (b.drugName?.name || "").localeCompare(a.drugName?.name || "");
+    } else if (sortBy === "stock") {
+      return sortOrder === "asc" ? a.remainingQty - b.remainingQty : b.remainingQty - a.remainingQty;
+    } else if (sortBy === "expiry") {
+      return sortOrder === "asc"
+        ? new Date(a.expiryDate) - new Date(b.expiryDate)
+        : new Date(b.expiryDate) - new Date(a.expiryDate);
+    }
+    return 0;
+  });
+
+  const toggleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
   const toggleLowStock = () => setShowLowStock(!showLowStock);
   const toggleExpiring = () => setShowExpiring(!showExpiring);
 
@@ -137,10 +175,9 @@ const StockList = () => {
           </div>
         </div>
 
-        {/* Alerts Section – Collapsible with buttons */}
+        {/* Alerts Section – Collapsible */}
         {(lowStock.length > 0 || expiring.red?.length > 0) && (
           <div className="space-y-4 mb-8">
-            {/* Low Stock Alert */}
             {lowStock.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <button
@@ -174,7 +211,6 @@ const StockList = () => {
               </div>
             )}
 
-            {/* Expiring Soon Alert */}
             {expiring.red?.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <button
@@ -212,19 +248,62 @@ const StockList = () => {
           </div>
         )}
 
-        {/* Batches Grid – Professional Cards */}
+        {/* Active Batches Section with Search and Sort */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Package className="w-5 h-5 text-indigo-500" />
-            Active Batches
-          </h2>
-          {batches.length === 0 ? (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <Package className="w-5 h-5 text-indigo-500" />
+              Active Batches
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by drug or batch..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64"
+                />
+              </div>
+              {/* Sort buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => toggleSort("name")}
+                  className={`px-3 py-2 text-sm rounded-xl border transition ${
+                    sortBy === "name" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
+                </button>
+                <button
+                  onClick={() => toggleSort("stock")}
+                  className={`px-3 py-2 text-sm rounded-xl border transition ${
+                    sortBy === "stock" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  Stock {sortBy === "stock" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
+                </button>
+                <button
+                  onClick={() => toggleSort("expiry")}
+                  className={`px-3 py-2 text-sm rounded-xl border transition ${
+                    sortBy === "expiry" ? "bg-indigo-50 border-indigo-300 text-indigo-700" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  Expiry {sortBy === "expiry" && (sortOrder === "asc" ? <SortAsc className="inline w-3 h-3 ml-1" /> : <SortDesc className="inline w-3 h-3 ml-1" />)}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {sortedBatches.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
-              No batches available.
+              No batches found.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {batches.map((batch) => {
+              {sortedBatches.map((batch) => {
                 const status = getExpiryStatus(batch.expiryDate);
                 let statusBadge = {
                   label: "Stable",
@@ -234,6 +313,7 @@ const StockList = () => {
                 if (status === "yellow") statusBadge = { label: "Near expiry", classes: "bg-amber-100 text-amber-700" };
                 if (status === "expired") statusBadge = { label: "Expired", classes: "bg-gray-200 text-gray-600" };
 
+                const isLowStockItem = lowStock.some(item => item.drug === batch.drugName?.name);
                 const unitLabel = batch.unitType
                   ? `${batch.remainingQty} ${batch.unitType}${batch.remainingQty !== 1 ? "s" : ""}`
                   : batch.remainingQty;
@@ -241,8 +321,13 @@ const StockList = () => {
                 return (
                   <div
                     key={batch._id}
-                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
+                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group relative"
                   >
+                    {isLowStockItem && (
+                      <div className="absolute top-0 right-0 mt-2 mr-2">
+                        <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-1 rounded-full">Low stock</span>
+                      </div>
+                    )}
                     <div className="p-5">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -306,6 +391,7 @@ const StockList = () => {
         </div>
       </div>
 
+      {/* Modals remain the same as before */}
       {/* Adjust Stock Modal */}
       {selectedBatch && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
